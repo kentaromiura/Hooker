@@ -15,7 +15,5 @@ The texthook page I suggest is https://anacreondjt.gitlab.io/docs/texthooker/ wh
 TODOs:
 
 - make a status icon in the os bar to kill the process (https://github.com/olback/tray-item-rs/ ?)
-- configurable hookers page --page 
-- configurable ports ?
 - Using a single port and routing for the SSE part instead of using a different port
 
