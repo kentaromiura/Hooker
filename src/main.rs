@@ -1,6 +1,10 @@
 use tiny_http::{Header, Response, Server};
 extern crate clipboard_master;
-extern crate crossclip;
+
+#[cfg(target_os = "windows")]
+use clipboard_win::{formats, get_clipboard};
+//temporarly disable crossclip as it doesn't build on windows...
+//extern crate crossclip;
 extern crate hyper_sse;
 #[macro_use]
 extern crate lazy_static;
@@ -17,7 +21,7 @@ lazy_static! {
 #[derive(Parser,Default,Debug)]
 #[clap(author="Cristian Carlesso <@kentaromiura>", version="v1.0.0", about="Hooker page helper for VNs")]
 struct Arguments {
-   #[clap(short='c', long="hookpage")]
+   #[clap(short='c', long="hookpage", default_value="notexists")]
    page: PathBuf,
    #[clap(short='p', long="webport", default_value_t=8000)]
    port1: u32,
@@ -28,7 +32,7 @@ struct Arguments {
 
 
 use clipboard_master::{CallbackResult, ClipboardHandler, Master};
-use crossclip::{Clipboard, SystemClipboard};
+//use crossclip::{Clipboard, SystemClipboard};
 
 fn main() {
     let args = Arguments::parse();
@@ -43,9 +47,12 @@ fn main() {
 
     impl ClipboardHandler for Handler {
         fn on_clipboard_change(&mut self) -> CallbackResult {
-            let clipboard = SystemClipboard::new().unwrap();
+            
+            //let clipboard = SystemClipboard::new().unwrap();
+
+            let result: String = get_clipboard(formats::Unicode).unwrap();
             // TODO: maybe refactor this out.
-            self.latest = String::from(clipboard.get_string_contents().unwrap());
+            self.latest = String::from(result);
             // println!("{:?}", self.latest);
             SSE.push(0, "update", &self.latest).ok();
 
