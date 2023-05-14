@@ -1,6 +1,6 @@
 # Hooker
 
-Currently (https://learnjapanese.moe/vn/#playing-visual-novels-to-learn-japanese)[The visual novel guide] to be able to read Japanese VNs with side-by-side text where one can use yomichan/10ten is good but I have a couple of issues with it:
+Currently [https://learnjapanese.moe/vn/#playing-visual-novels-to-learn-japanese](The visual novel guide) to be able to read Japanese VNs with side-by-side text where one can use yomichan/10ten is good but I have a couple of issues with it:
 
 - 1 it requires installing a browser plugin that can read the system clipboard, which I think is a security issue (although Chrome asks for it and requires user manual activation)
 
