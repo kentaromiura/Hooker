@@ -4,32 +4,35 @@ extern crate clipboard_master;
 #[cfg(target_os = "windows")]
 use clipboard_win::{formats, get_clipboard};
 //temporarly disable crossclip as it doesn't build on windows...
+#[cfg(not(target_os = "windows"))]
+use arboard::Clipboard;
 //extern crate crossclip;
 extern crate hyper_sse;
 #[macro_use]
 extern crate lazy_static;
-use std::{path::PathBuf};
-use std::thread;
 use clap::Parser;
 use std::fs;
+use std::path::PathBuf;
+use std::thread;
 
 lazy_static! {
     static ref SSE: hyper_sse::Server<u8> = hyper_sse::Server::new();
 }
 
-
-#[derive(Parser,Default,Debug)]
-#[clap(author="Cristian Carlesso <@kentaromiura>", version="v1.0.0", about="Hooker page helper for VNs")]
+#[derive(Parser, Default, Debug)]
+#[clap(
+    author = "Cristian Carlesso <@kentaromiura>",
+    version = "v1.0.0",
+    about = "Hooker page helper for VNs"
+)]
 struct Arguments {
-   #[clap(short='c', long="hookpage", default_value="notexists")]
-   page: PathBuf,
-   #[clap(short='p', long="webport", default_value_t=8000)]
-   port1: u32,
-   #[clap(short='s', long="sseport", default_value_t=8001)]
-   port2: u32
+    #[clap(short = 'c', long = "hookpage", default_value = "notexists")]
+    page: PathBuf,
+    #[clap(short = 'p', long = "webport", default_value_t = 8000)]
+    port1: u32,
+    #[clap(short = 's', long = "sseport", default_value_t = 8001)]
+    port2: u32,
 }
-
-
 
 use clipboard_master::{CallbackResult, ClipboardHandler, Master};
 //use crossclip::{Clipboard, SystemClipboard};
@@ -37,7 +40,7 @@ use clipboard_master::{CallbackResult, ClipboardHandler, Master};
 fn main() {
     let args = Arguments::parse();
     SSE.spawn(format!("[::1]:{}", args.port2).parse().unwrap());
-    let server = Server::http(format!("0.0.0.0:{}",args.port1)).unwrap();
+    let server = Server::http(format!("0.0.0.0:{}", args.port1)).unwrap();
 
     use std::io;
 
@@ -47,10 +50,13 @@ fn main() {
 
     impl ClipboardHandler for Handler {
         fn on_clipboard_change(&mut self) -> CallbackResult {
-            
             //let clipboard = SystemClipboard::new().unwrap();
-
+            #[cfg(target_os = "windows")]
             let result: String = get_clipboard(formats::Unicode).unwrap();
+            #[cfg(not(target_os = "windows"))]
+            let mut clipboard = Clipboard::new().unwrap();
+            #[cfg(not(target_os = "windows"))]
+            let result: String = clipboard.get_text().unwrap();
             // TODO: maybe refactor this out.
             self.latest = String::from(result);
             // println!("{:?}", self.latest);
@@ -98,9 +104,7 @@ fn main() {
         + SSE.generate_auth_token(Some(0)).unwrap().as_str()
         + "');
         evtSource.addEventListener('update', event => {
-            var p = document.createElement('p');
-            p.innerHTML = JSON.parse(event.data);
-            document.body.appendChild(p);
+           globalThis.process(event)
         });
     </script>
 </body>"),
